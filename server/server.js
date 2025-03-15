@@ -1,20 +1,33 @@
-require("dotenv").config();
+const http = require("http");
 const WebSocket = require("ws");
 
-const PORT = process.env.PORT || 3001;
-const server = new WebSocket.Server({ port: PORT });
+const PORT = process.env.PORT || 8080;
 
-console.log(`🚀 WebSocket server running on ws://localhost:${PORT}`);
+// Create an HTTP server (needed for Render)
+const server = http.createServer((req, res) => {
+  res.writeHead(200, { "Content-Type": "text/plain" });
+  res.end("WebSocket Server is running\n");
+});
 
-server.on("connection", (socket) => {
-  console.log("⚡ New WebSocket connection");
+// Create a WebSocket server using the HTTP server
+const wss = new WebSocket.Server({ server });
 
-  socket.on("message", (message) => {
-    console.log(`📩 Received: ${message}`);
-    socket.send(`Echo: ${message}`); // Send back the message
+wss.on("connection", (ws) => {
+  console.log("Client connected!");
+
+  ws.on("message", (message) => {
+    console.log(`Received: ${message}`);
+
+    // Send response back to client
+    ws.send(`Server received: ${message}`);
   });
 
-  socket.on("close", () => {
-    console.log("❌ WebSocket connection closed");
+  ws.on("close", () => {
+    console.log("Client disconnected");
   });
+});
+
+// Start the server and bind to 0.0.0.0
+server.listen(PORT, "0.0.0.0", () => {
+  console.log(`WebSocket server running on ws://0.0.0.0:${PORT}`);
 });
