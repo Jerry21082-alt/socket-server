@@ -1,6 +1,7 @@
 function getDomain(url) {
   try {
-    return new URL(url).hostname.replace(/^www\./, "");
+    const { origin } = new URL(url); // Keep protocol (https://)
+    return origin.replace(/^www\./, ""); // Remove 'www.'
   } catch (error) {
     console.error("Invalid URL:", url);
     return null;
